@@ -10,8 +10,18 @@ import UIKit
 import SpriteKit
 
 class ViewController: UIViewController {
-    @IBOutlet weak var cubeA: UIView!
-    @IBOutlet weak var cubeB: UIView!
+    @IBOutlet weak var cubeA: UIView! {
+        didSet {
+            cubeA.layer.masksToBounds = false
+            cubeA.layer.cornerRadius = cubeA.frame.size.width / 2
+        }
+    }
+    @IBOutlet weak var cubeB: UIView! {
+        didSet {
+            cubeB.layer.masksToBounds = false
+            cubeB.layer.cornerRadius = cubeB.frame.size.width / 2
+        }
+    }
     
     var animator: UIDynamicAnimator!
     var pushA: UIPushBehavior!
@@ -50,52 +60,50 @@ class ViewController: UIViewController {
 
             animator.removeAllBehaviors()
             
+            let collision = UICollisionBehavior(items: [cubeA, cubeB])
+            collision.translatesReferenceBoundsIntoBoundary = true
+            animator.addBehavior(collision)
+            
             switch recognizer.state {
             case .ended:
                 
-                pushA = UIPushBehavior(items: [cubeA] as! [UIDynamicItem], mode: .instantaneous)
-                pushB = UIPushBehavior(items: [cubeB] as! [UIDynamicItem], mode: .instantaneous)
+                let velocity = recognizer.velocity(in: view.superview)
+                let x = velocity.y
+                let y = velocity.x
+                
+                if x == 0 && y == 0 {
+                    return
+                }
+
+                let pushA = UIPushBehavior(items: [cubeA] as! [UIDynamicItem], mode: .instantaneous)
+                let pushB = UIPushBehavior(items: [cubeB] as! [UIDynamicItem], mode: .instantaneous)
                 animator.addBehavior(pushA)
                 animator.addBehavior(pushB)
-                
-                let collision = UICollisionBehavior(items: [cubeA, cubeB])
-                collision.translatesReferenceBoundsIntoBoundary = true
-                animator.addBehavior(collision)
                 
                 if view == cubeA {
                     push = pushA
                 } else if view == cubeB {
                     push = pushB
                 }
-                
-                /*
-                 CGPoint velocity = [gesture velocityInView:gesture.view.superview];
-                 
-                 // if we aren't dragging it down, just snap it back and quit
-                 
-                 if (fabs(atan2(velocity.y, velocity.x) - M_PI_2) > M_PI_4) {
-                 UISnapBehavior *snap = [[UISnapBehavior alloc] initWithItem:gesture.view snapToPoint:startCenter];
-                 [self.animator addBehavior:snap];
-                 
-                 return;
-                 }
-                 */
-                
-                let velocity = recognizer.velocity(in: view.superview)
-                
-                let x = velocity.y
-                let y = velocity.x
 
                 let angle = atan2(x, y)
-
                 push?.active = false
                 push?.setAngle(angle, magnitude: 10)
                 push?.active = true
-                break
+                
             default:
-                view.center = CGPoint(x: view.center.x + translation.x,
+                
+                let center = CGPoint(x: view.center.x + translation.x,
                                       y: view.center.y + translation.y)
-                break
+                
+                guard self.view.frame.minX != center.x,
+                    self.view.frame.maxX != center.x,
+                    self.view.frame.minY != center.y,
+                    self.view.frame.maxY != center.y else {
+                    return
+                }
+
+                view.center = center
             }
         }
     }

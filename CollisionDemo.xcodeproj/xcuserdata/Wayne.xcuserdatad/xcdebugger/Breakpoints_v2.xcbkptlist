@@ -10,11 +10,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "CollisionDemo/ViewController.swift"
-            timestampString = "553620039.5859179"
+            timestampString = "553698641.5131921"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "91"
-            endingLineNumber = "91"
+            startingLineNumber = "90"
+            endingLineNumber = "90"
             landmarkName = "handlePanGesture(recognizer:)"
             landmarkType = "7">
          </BreakpointContent>
